@@ -35,7 +35,7 @@ export const KEYBOARD_MAP: Record<string, string> = {
   'a': 'ㅁ', 's': 'ㄴ', 'd': 'ㅇ', 'f': 'ㄹ', 'g': 'ㅎ',
   'h': 'ㅗ', 'j': 'ㅓ', 'k': 'ㅏ', 'l': 'ㅣ',
   'z': 'ㅋ', 'x': 'ㅌ', 'c': 'ㅊ', 'v': 'ㅍ', 'b': 'ㅜ',
-  'n': 'ㅡ', 'm': 'ㅁ',
+  'n': 'ㅡ',
   // Shift keys (double consonants and compound vowels)
   'Q': 'ㅃ', 'W': 'ㅉ', 'E': 'ㄸ', 'R': 'ㄲ', 'T': 'ㅆ',
   'O': 'ㅒ', 'P': 'ㅖ',
@@ -73,7 +73,6 @@ export const KEYBOARD_LAYOUT = [
     { key: 'v', jamo: 'ㅍ', shift: '' },
     { key: 'b', jamo: 'ㅜ', shift: '' },
     { key: 'n', jamo: 'ㅡ', shift: '' },
-    { key: 'm', jamo: 'ㅁ', shift: '' },
   ],
 ];
 
