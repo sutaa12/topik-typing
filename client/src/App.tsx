@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 
 // Remove trailing slash from base URL for Wouter (e.g., "/topik-typing/" → "/topik-typing")
+// When BASE_URL is "/", produce empty string which Wouter treats as no base prefix
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function Routes() {
