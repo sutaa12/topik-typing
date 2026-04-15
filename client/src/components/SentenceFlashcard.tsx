@@ -19,7 +19,7 @@ export default function SentenceFlashcard({ sentences, levelName, onBack }: Prop
   const [viewMode, setViewMode] = useState<'list' | 'flashcard'>('list');
   const [flashcardIdx, setFlashcardIdx] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [expandedGrammar, setExpandedGrammar] = useState<Record<number, boolean>>({});
+  const [expandedGrammar, setExpandedGrammar] = useState<Record<string, boolean>>({});
 
   const filtered = useMemo(() => {
     if (!search.trim()) return sentences;
@@ -34,8 +34,8 @@ export default function SentenceFlashcard({ sentences, levelName, onBack }: Prop
 
   const currentFlashcard = filtered[flashcardIdx];
 
-  const toggleGrammar = (index: number) => {
-    setExpandedGrammar(prev => ({ ...prev, [index]: !prev[index] }));
+  const toggleGrammar = (key: string) => {
+    setExpandedGrammar(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -125,15 +125,15 @@ export default function SentenceFlashcard({ sentences, levelName, onBack }: Prop
                 {sentence.grammar && sentence.grammar.length > 0 && (
                   <div className="mt-2">
                     <button
-                      onClick={() => toggleGrammar(i)}
+                      onClick={() => toggleGrammar(sentence.korean)}
                       className="flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-800 transition-colors"
                     >
                       <BookOpen className="w-3.5 h-3.5" />
                       文法ノート ({sentence.grammar.length})
-                      <ChevronRight className={`w-3 h-3 transition-transform ${expandedGrammar[i] ? 'rotate-90' : ''}`} />
+                      <ChevronRight className={`w-3 h-3 transition-transform ${expandedGrammar[sentence.korean] ? 'rotate-90' : ''}`} />
                     </button>
                     <AnimatePresence>
-                      {expandedGrammar[i] && (
+                      {expandedGrammar[sentence.korean] && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}

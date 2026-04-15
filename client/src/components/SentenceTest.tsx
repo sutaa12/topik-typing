@@ -63,7 +63,9 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
   useEffect(() => { currentIdxRef.current = currentIdx; }, [currentIdx]);
 
   const currentSentence = gameSentences[currentIdx];
-  const progressPercent = ((currentIdx) / gameSentences.length) * 100;
+  const progressPercent = gameSentences.length > 0
+    ? ((currentIdx + 1) / gameSentences.length) * 100
+    : 0;
 
   const doSubmit = useCallback(() => {
     if (feedbackRef.current) return;
@@ -75,7 +77,8 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
     const isCorrect = userInput === sentence.korean;
 
     setFeedback(isCorrect ? 'correct' : 'wrong');
-    recordAnswer(level, sentence.korean, isCorrect);
+    // Use "sentence:" prefix to avoid polluting word progress stats
+    recordAnswer(`sentence:${level}`, sentence.korean, isCorrect);
     setScore(prev => ({
       correct: prev.correct + (isCorrect ? 1 : 0),
       wrong: prev.wrong + (isCorrect ? 0 : 1),
@@ -107,11 +110,11 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
       } else if (e.key === 'Enter') {
         e.preventDefault();
         doSubmit();
-      } else if (e.key.length === 1) {
-        e.preventDefault();
+      } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const key = e.shiftKey ? e.key : e.key.toLowerCase();
         const jamo = KEYBOARD_MAP[key];
         if (jamo) {
+          e.preventDefault();
           setHangulState(prev => processJamo(prev, jamo));
         }
       }
@@ -140,7 +143,7 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
     if (feedback) return;
     const sentence = gameSentences[currentIdx];
     if (!sentence) return;
-    recordAnswer(level, sentence.korean, false);
+    recordAnswer(`sentence:${level}`, sentence.korean, false);
     setScore(prev => ({ ...prev, wrong: prev.wrong + 1 }));
 
     if (currentIdx + 1 >= gameSentences.length) {
@@ -199,7 +202,7 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
             <RotateCcw className="w-4 h-4" /> もう一度
           </Button>
           <Button onClick={onBack} className="gap-2 bg-terracotta hover:bg-terracotta/90 text-white">
-            <ArrowLeft className="w-4 h-4" /> 級選択に戻る
+            <ArrowLeft className="w-4 h-4" /> モード選択に戻る
           </Button>
         </div>
       </motion.div>

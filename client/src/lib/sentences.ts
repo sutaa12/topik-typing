@@ -991,7 +991,7 @@ export function getSentencesForLevel(level: string): Sentence[] {
   const raw = sentencesData[level] || [];
   return raw.map((s) => ({
     ...s,
-    level: parseInt(level),
+    level: parseInt(level, 10),
   }));
 }
 
