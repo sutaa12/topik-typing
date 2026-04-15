@@ -14,10 +14,13 @@ import {
   levelDescriptions,
   levelColors,
 } from '@/lib/words';
+import { getSentencesForLevel, getSentenceCount } from '@/lib/sentences';
 import { useProgress } from '@/hooks/useProgress';
 import TypingGame from '@/components/TypingGame';
+import SentenceTest from '@/components/SentenceTest';
 import StudyTips from '@/components/StudyTips';
 import WordList from '@/components/WordList';
+import SentenceFlashcard from '@/components/SentenceFlashcard';
 import {
   BookOpen,
   Keyboard,
@@ -30,13 +33,15 @@ import {
   Sparkles,
   ListChecks,
   RotateCcw,
+  FileText,
+  Languages,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 
 const HERO_IMG = 'https://private-us-east-1.manuscdn.com/sessionFile/p9upPMTuLHgu3rnxkdbiCh/sandbox/cgIeJhSn89sUnP6L9cOwlm-img-1_1770788706000_na1fn_aGVyby1iZw.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvcDl1cFBNVHVMSGd1M3JueGtkYmlDaC9zYW5kYm94L2NnSWVKaFNuODlzVW5QNkw5Y093bG0taW1nLTFfMTc3MDc4ODcwNjAwMF9uYTFmbl9hR1Z5YnkxaVp3LmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=kld~3I~vmrmywmj5~Gp1TFW9qExflTGP76MfvB8QbfJ3U6XlfT9r3iN6S~EzKuW2AKfC0os-lmpqzjphUEL8z51ZCp66LbTNLBIZ7to9KgRbTo5oPtkR5cm5PEeAHgskeAFudrZ6SoR~XFfi4MAOIPIjjJzk2~npzBhXKggcTnoUYo0tvqxjRFtdcbxwu7cZhhVkU9ddMOzORXI1UZVUxsTc-r3pqKC0oOjeC-gnBLFsa-j5yzgX737aABCaWRxILfrB2myNoH5IbwcXrOLy7ksw7ojjya9donSoSE2mkpcegPrMo7OtL5wCPPMO7gkObo9kkWgD7pjySZYkm~6C7A__';
 
-type View = 'home' | 'level-select' | 'mode-select' | 'game' | 'tips' | 'wordlist' | 'review';
+type View = 'home' | 'level-select' | 'mode-select' | 'game' | 'tips' | 'wordlist' | 'review' | 'sentence-game' | 'sentence-flashcard';
 
 const levelEmojis: Record<string, string> = {
   "1": "🌸", "2": "🌊", "3": "🍂", "4": "🎋", "5": "🏔️", "6": "🏯",
@@ -51,6 +56,7 @@ export default function Home() {
   const stats = getOverallStats();
 
   const words = useMemo(() => getWordsForLevel(selectedLevel), [selectedLevel]);
+  const sentences = useMemo(() => getSentencesForLevel(selectedLevel), [selectedLevel]);
 
   // Collect wrong words across all levels for review
   const wrongWordsForReview = useMemo(() => {
@@ -98,6 +104,32 @@ export default function Home() {
         levelName={levelNames[selectedLevel]}
         onBack={() => setView('level-select')}
       />
+    );
+  }
+
+  // Sentence Flashcard view
+  if (view === 'sentence-flashcard') {
+    return (
+      <SentenceFlashcard
+        sentences={sentences}
+        levelName={levelNames[selectedLevel]}
+        onBack={() => setView('mode-select')}
+      />
+    );
+  }
+
+  // Sentence Game view
+  if (view === 'sentence-game') {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <SentenceTest
+          sentences={sentences}
+          level={selectedLevel}
+          mode={gameMode}
+          onBack={() => setView('mode-select')}
+          sentenceCount={Math.min(wordCount, sentences.length)}
+        />
+      </div>
     );
   }
 
@@ -290,8 +322,8 @@ export default function Home() {
                       <BookOpen className="w-5 h-5 text-sage" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-charcoal group-hover:text-sage transition-colors">単語帳</h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">級別の単語一覧・フラッシュカード</p>
+                      <h3 className="font-semibold text-charcoal group-hover:text-sage transition-colors">単語帳・例文帳</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">級別の単語一覧・例文フラッシュカード</p>
                     </div>
                   </div>
                 </motion.button>
@@ -315,6 +347,8 @@ export default function Home() {
                     { icon: ListChecks, text: '練習モード＆通常モード', color: 'text-sage' },
                     { icon: Trophy, text: '学習進捗の記録・統計', color: 'text-terracotta' },
                     { icon: BookOpen, text: '発音記号・カタカナ読み付き', color: 'text-teal' },
+                    { icon: FileText, text: '例文タイピング・文法解説付き', color: 'text-violet-600' },
+                    { icon: Languages, text: '発音の違いを視覚的に表示', color: 'text-terracotta' },
                     { icon: Lightbulb, text: '試験対策の学習ヒント', color: 'text-sage' },
                   ].map((f, i) => (
                     <div key={i} className="flex items-center gap-2.5">
@@ -508,17 +542,53 @@ export default function Home() {
                 className="w-full h-14 text-lg font-bold bg-terracotta hover:bg-terracotta/90 shadow-lg hover:shadow-xl transition-all rounded-2xl"
               >
                 <Keyboard className="w-5 h-5 mr-2" />
-                スタート
+                単語タイピング スタート
               </Button>
 
-              {/* Word list link */}
-              <button
-                onClick={() => setView('wordlist')}
-                className="w-full text-center text-sm text-muted-foreground hover:text-teal transition-colors flex items-center justify-center gap-1.5"
-              >
-                <ListChecks className="w-4 h-4" />
-                この級の単語一覧を見る
-              </button>
+              {/* Sentence practice section */}
+              {getSentenceCount(selectedLevel) > 0 && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-px flex-1 bg-warm-beige" />
+                    <span className="text-xs text-muted-foreground px-2">例文で学ぶ</span>
+                    <div className="h-px flex-1 bg-warm-beige" />
+                  </div>
+
+                  <Button
+                    onClick={() => setView('sentence-game')}
+                    size="lg"
+                    variant="outline"
+                    className="w-full h-14 text-lg font-bold border-teal text-teal hover:bg-teal/5 shadow-sm hover:shadow-lg transition-all rounded-2xl"
+                  >
+                    <FileText className="w-5 h-5 mr-2" />
+                    例文タイピング スタート
+                  </Button>
+
+                  <p className="text-xs text-center text-muted-foreground">
+                    単語を使った例文で実践的に練習 — 文法解説・発音ガイド付き
+                  </p>
+                </div>
+              )}
+
+              {/* Word list & Sentence flashcard links */}
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setView('wordlist')}
+                  className="w-full text-center text-sm text-muted-foreground hover:text-teal transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <ListChecks className="w-4 h-4" />
+                  この級の単語一覧を見る
+                </button>
+                {getSentenceCount(selectedLevel) > 0 && (
+                  <button
+                    onClick={() => setView('sentence-flashcard')}
+                    className="w-full text-center text-sm text-muted-foreground hover:text-violet-600 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Languages className="w-4 h-4" />
+                    この級の例文帳を見る（{getSentenceCount(selectedLevel)}文）
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
