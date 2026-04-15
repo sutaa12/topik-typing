@@ -42,7 +42,7 @@ const sentencesData: Record<string, SentenceRaw[]> = {
       korean: "가게에서 과일을 샀어요.",
       japanese: "店で果物を買いました。",
       katakana: "カゲエソ クァイルル サッソヨ",
-      romanization: "gagaeso gwaireul sasseoyo",
+      romanization: "gageeseo gwaireul sasseoyo",
       words: ["가게", "과일"],
       grammar: [
         { particle: "에서", meaning: "～で（動作の場所）", example: "학교에서 공부해요", difference: "日本語の「で」に相当するが、動作が行われる場所にのみ使う。存在の場所には「에」を使う" },
@@ -596,7 +596,7 @@ const sentencesData: Record<string, SentenceRaw[]> = {
       korean: "이 문제의 핵심은 개인의 인식 변화에 있습니다.",
       japanese: "この問題の核心は個人の認識変化にあります。",
       katakana: "イ ムンジェエ ヘクシムン ケイネ インシク ピョナエ イッスムニダ",
-      romanization: "i munje haeksimeun gaeine insik byeonhwae isseumnida",
+      romanization: "i munjee haeksimeun gaeine insik byeonhwae isseumnida",
       words: ["핵심", "개인", "인식", "변화"],
       grammar: [
         { particle: "에 있다", meaning: "～にある（所在・原因）", example: "원인은 제도에 있다", difference: "原因や理由の所在を示す。日本語の「～にある」に相当" },
@@ -695,7 +695,7 @@ const sentencesData: Record<string, SentenceRaw[]> = {
       korean: "국민의 의무와 권리는 법률에 의해 보장됩니다.",
       japanese: "国民の義務と権利は法律によって保障されます。",
       katakana: "クンミネ ウィムワ クォルリヌン ポムニュレ ウィヘ ポジャンデムニダ",
-      romanization: "gunmine uimuwa gwollneun beomnyure uihae bojanddoemnida",
+      romanization: "gunmine uimuwa gwollneun beomnyure uihae bojangdoemnida",
       words: ["의무", "법률", "보장"],
     },
     {
@@ -786,7 +786,7 @@ const sentencesData: Record<string, SentenceRaw[]> = {
       korean: "자율적인 판단을 전제로 하는 제도가 확립되어야 합니다.",
       japanese: "自律的な判断を前提とする制度が確立されなければなりません。",
       katakana: "チャユルジョギン パンダヌル チョンジェロ ハヌン チェドガ ファンニプテオヤ ハムニダ",
-      romanization: "jayuljeogin pandaneul jeonjero haneun jedoga hwangnipteoya hamnida",
+      romanization: "jayuljeogin pandaneul jeonjero haneun jedoga hwangniptoeoya hamnida",
       words: ["자율", "전제", "확립"],
       pronunciation: [
         { korean: "확립", reading: "황닙", explanation: "비음화+流音の鼻音化：ㄱ+ㄹ → [ㅇㄴ]で[황닙]", highlighted: true },
