@@ -74,7 +74,9 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
 
     const committed = commitCurrent(hangulStateRef.current);
     const userInput = committed.display.trim();
-    const isCorrect = userInput === sentence.korean;
+    // Strip punctuation not available on the virtual keyboard (e.g. `.` `?` `!`)
+    const normalize = (s: string) => s.replace(/[.?!]/g, '').trim();
+    const isCorrect = normalize(userInput) === normalize(sentence.korean);
 
     setFeedback(isCorrect ? 'correct' : 'wrong');
     // Use "sentence:" prefix to avoid polluting word progress stats
