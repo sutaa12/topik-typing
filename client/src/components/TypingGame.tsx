@@ -34,6 +34,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 
 type GameMode = 'practice' | 'normal';
+type VisibilityMode = 'all' | 'optional' | 'korean-only';
 
 type Props = {
   words: Word[];
@@ -41,20 +42,32 @@ type Props = {
   mode: GameMode;
   onBack: () => void;
   wordCount?: number;
+  repeatMode?: boolean;
+  visibilityMode?: VisibilityMode;
 };
 
 const SUCCESS_IMG = 'https://private-us-east-1.manuscdn.com/sessionFile/p9upPMTuLHgu3rnxkdbiCh/sandbox/cgIeJhSn89sUnP6L9cOwlm-img-5_1770788707000_na1fn_c3VjY2Vzcy1pbGx1c3RyYXRpb24.png?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvcDl1cFBNVHVMSGd1M3JueGtkYmlDaC9zYW5kYm94L2NnSWVKaFNuODlzVW5QNkw5Y093bG0taW1nLTVfMTc3MDc4ODcwNzAwMF9uYTFmbl9jM1ZqWTJWemN5MXBiR3gxYzNSeVlYUnBiMjQucG5nP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=qDb1rtZ1AlM~sU2dcyvFqMYkysT~O6Kl8LO6esSxS-oORumXILKvcpalio-lTi8BcQf4RoD4cNtq6UGzJY~uncGQMxqqiQ32wWRc9gcJVx5woWl0zBC1JpCaKFFBwjwM3j9dkRl-llFdL4yR88tNIRSyzaVAbFJZzSU70azZwZLQ4NZHM4KcOQvbJlAVHoL-NBbUPb9LEdlGRxXYscUOlNWWVXCWFfFMcJ8glFDgewT0RwDTPqGzpBgPOp6YQsZkS2XE77gMqjnoZ8tH5iwNIK86-tU5GyQF7deMEUSNlFH2lbDIYmYz7Qxx3D7KghRMu8jUvXNiQrW9LyqoLYu71Q__';
 
-export default function TypingGame({ words, level, mode, onBack, wordCount = 10 }: Props) {
+export default function TypingGame({
+  words,
+  level,
+  mode,
+  onBack,
+  wordCount = 10,
+  repeatMode = false,
+  visibilityMode = 'all',
+}: Props) {
   const gameWords = useMemo(() => shuffleArray(words).slice(0, wordCount), [words, wordCount]);
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [repeatCount, setRepeatCount] = useState(0); // Track repetitions for current word
   const [hangulState, setHangulState] = useState<HangulState>(createInitialState());
   const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
   const [showHint, setShowHint] = useState(false);
+  const [showDetails, setShowDetails] = useState(visibilityMode !== 'korean-only'); // Toggle for optional visibility
   const [score, setScore] = useState({ correct: 0, wrong: 0 });
   const [isComplete, setIsComplete] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(true);
-  const { recordAnswer } = useProgress();
+  const { recordAnswer, markWordAsCleared, getLevel } = useProgress();
   const hangulStateRef = useRef(hangulState);
   const feedbackRef = useRef(feedback);
   const currentIdxRef = useRef(currentIdx);
@@ -84,6 +97,23 @@ export default function TypingGame({ words, level, mode, onBack, wordCount = 10 
     }));
 
     setTimeout(() => {
+      // Handle repeat mode logic
+      if (repeatMode && isCorrect) {
+        const currentRepeat = repeatCount + 1;
+        if (currentRepeat < 3) {
+          // Still need more repetitions for this word
+          setRepeatCount(currentRepeat);
+          setHangulState(createInitialState());
+          setFeedback(null);
+          setShowHint(false);
+          return;
+        } else {
+          // Completed 3 repetitions, mark as cleared and move to next
+          markWordAsCleared(level, word.korean);
+          setRepeatCount(0);
+        }
+      }
+
       if (currentIdxRef.current + 1 >= gameWords.length) {
         setIsComplete(true);
       } else {
@@ -91,9 +121,12 @@ export default function TypingGame({ words, level, mode, onBack, wordCount = 10 
         setHangulState(createInitialState());
         setFeedback(null);
         setShowHint(false);
+        if (!repeatMode) {
+          setRepeatCount(0);
+        }
       }
     }, isCorrect ? 800 : 1500);
-  }, [gameWords, level, recordAnswer]);
+  }, [gameWords, level, recordAnswer, repeatMode, repeatCount, markWordAsCleared]);
 
   // Physical keyboard handler
   useEffect(() => {
@@ -225,15 +258,27 @@ export default function TypingGame({ words, level, mode, onBack, wordCount = 10 
           </div>
           <div className="text-xs text-muted-foreground mono-text">
             {currentIdx + 1} / {gameWords.length}
+            {repeatMode && ` (${repeatCount + 1}/3)`}
           </div>
         </div>
-        <button
-          onClick={() => setShowKeyboard(!showKeyboard)}
-          className="text-sm text-muted-foreground hover:text-charcoal transition-colors flex items-center gap-1"
-        >
-          {showKeyboard ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          <span className="hidden sm:inline">キーボード</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {visibilityMode === 'optional' && (
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-sm text-muted-foreground hover:text-charcoal transition-colors flex items-center gap-1"
+            >
+              {showDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              <span className="hidden sm:inline">詳細</span>
+            </button>
+          )}
+          <button
+            onClick={() => setShowKeyboard(!showKeyboard)}
+            className="text-sm text-muted-foreground hover:text-charcoal transition-colors flex items-center gap-1"
+          >
+            {showKeyboard ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <span className="hidden sm:inline">キーボード</span>
+          </button>
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -255,17 +300,26 @@ export default function TypingGame({ words, level, mode, onBack, wordCount = 10 
                 <div className="korean-text text-2xl sm:text-4xl lg:text-5xl font-bold text-charcoal tracking-wide">
                   {currentWord.korean}
                 </div>
-                <div className="text-sm sm:text-lg text-teal font-medium">
-                  {currentWord.japanese}
-                </div>
-                <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                  <span className="bg-warm-beige/60 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
-                    {currentWord.katakana}
-                  </span>
-                  <span className="bg-warm-beige/60 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full mono-text text-[10px] sm:text-xs">
-                    [{currentWord.romanization}]
-                  </span>
-                </div>
+                {(visibilityMode === 'all' || (visibilityMode === 'optional' && showDetails)) && (
+                  <>
+                    <div className="text-sm sm:text-lg text-teal font-medium">
+                      {currentWord.japanese}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                      <span className="bg-warm-beige/60 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full">
+                        {currentWord.katakana}
+                      </span>
+                      <span className="bg-warm-beige/60 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full mono-text text-[10px] sm:text-xs">
+                        [{currentWord.romanization}]
+                      </span>
+                    </div>
+                  </>
+                )}
+                {visibilityMode === 'korean-only' && (
+                  <div className="text-xs text-muted-foreground">
+                    韓国語のみ表示中
+                  </div>
+                )}
               </>
             ) : (
               <>

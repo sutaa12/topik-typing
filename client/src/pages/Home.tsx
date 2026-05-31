@@ -660,6 +660,35 @@ export default function Home() {
                   </button>
                 )}
               </div>
+
+              {/* Progress reset options */}
+              <div className="space-y-2 pt-2 border-t border-warm-beige">
+                <p className="text-xs text-muted-foreground text-center">進行状況のリセット</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (confirm('この級のクリア済みフラグをリセットしますか？')) {
+                        resetClearedWords(selectedLevel);
+                      }
+                    }}
+                    className="flex-1 text-xs py-2 px-3 rounded-lg border border-warm-beige text-muted-foreground hover:bg-warm-beige/30 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    この級
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('全級のクリア済みフラグをリセットしますか？')) {
+                        resetAllClearedWords();
+                      }
+                    }}
+                    className="flex-1 text-xs py-2 px-3 rounded-lg border border-warm-beige text-muted-foreground hover:bg-warm-beige/30 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    全級
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
