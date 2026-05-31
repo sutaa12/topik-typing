@@ -7,6 +7,7 @@ type LevelProgress = {
   bestStreak: number;
   masteredWords: string[];
   wrongWords: string[];
+  clearedWords: string[]; // For tracking completed questions in repeat/random mode
   lastPracticed: string | null;
 };
 
@@ -21,6 +22,7 @@ const defaultProgress: LevelProgress = {
   bestStreak: 0,
   masteredWords: [],
   wrongWords: [],
+  clearedWords: [],
   lastPracticed: null,
 };
 
@@ -98,5 +100,60 @@ export function useProgress() {
     return { totalCorrect, totalAttempts, totalMastered, bestStreak };
   }, [progress]);
 
-  return { progress, getLevel, recordAnswer, resetLevel, resetAll, getOverallStats };
+  const markWordAsCleared = useCallback((level: string, word: string) => {
+    setProgress(prev => {
+      const current = prev[level] || { ...defaultProgress };
+      const clearedWords = current.clearedWords.includes(word)
+        ? current.clearedWords
+        : [...current.clearedWords, word];
+
+      return {
+        ...prev,
+        [level]: {
+          ...current,
+          clearedWords,
+        },
+      };
+    });
+  }, []);
+
+  const resetClearedWords = useCallback((level: string) => {
+    setProgress(prev => {
+      const current = prev[level];
+      if (!current) return prev;
+
+      return {
+        ...prev,
+        [level]: {
+          ...current,
+          clearedWords: [],
+        },
+      };
+    });
+  }, []);
+
+  const resetAllClearedWords = useCallback(() => {
+    setProgress(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(level => {
+        next[level] = {
+          ...next[level],
+          clearedWords: [],
+        };
+      });
+      return next;
+    });
+  }, []);
+
+  return {
+    progress,
+    getLevel,
+    recordAnswer,
+    resetLevel,
+    resetAll,
+    getOverallStats,
+    markWordAsCleared,
+    resetClearedWords,
+    resetAllClearedWords,
+  };
 }

@@ -14,6 +14,7 @@ import {
   processJamo,
   processBackspace,
   processSpace,
+  processPunctuation,
   commitCurrent,
   KEYBOARD_MAP,
 } from '@/lib/hangul';
@@ -109,6 +110,9 @@ export default function SentenceTest({ sentences, level, mode, onBack, sentenceC
       } else if (e.key === ' ') {
         e.preventDefault();
         setHangulState(prev => processSpace(prev));
+      } else if (e.key === '.' || e.key === ',' || e.key === '?' || e.key === '!') {
+        e.preventDefault();
+        setHangulState(prev => processPunctuation(prev, e.key));
       } else if (e.key === 'Enter') {
         e.preventDefault();
         doSubmit();

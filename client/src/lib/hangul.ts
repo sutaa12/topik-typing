@@ -292,3 +292,12 @@ export function processSpace(state: HangulState): HangulState {
     display: committed.committed + ' ',
   };
 }
+
+export function processPunctuation(state: HangulState, punctuation: string): HangulState {
+  const committed = commitCurrent(state);
+  return {
+    buffer: [],
+    committed: committed.committed + punctuation,
+    display: committed.committed + punctuation,
+  };
+}
