@@ -52,7 +52,9 @@ export default function Home() {
   const [selectedLevel, setSelectedLevel] = useState<string>('1');
   const [gameMode, setGameMode] = useState<'practice' | 'normal'>('practice');
   const [wordCount, setWordCount] = useState(10);
-  const { getLevel, getOverallStats } = useProgress();
+  const [repeatMode, setRepeatMode] = useState(false); // 3 repetitions per question
+  const [visibilityMode, setVisibilityMode] = useState<'all' | 'optional' | 'korean-only'>('all');
+  const { getLevel, getOverallStats, resetClearedWords, resetAllClearedWords } = useProgress();
   const stats = getOverallStats();
 
   const words = useMemo(() => getWordsForLevel(selectedLevel), [selectedLevel]);
@@ -143,6 +145,8 @@ export default function Home() {
           mode={gameMode}
           onBack={() => setView('mode-select')}
           wordCount={wordCount}
+          repeatMode={repeatMode}
+          visibilityMode={visibilityMode}
         />
       </div>
     );
@@ -512,6 +516,73 @@ export default function Home() {
                     </div>
                   </div>
                 </button>
+              </div>
+
+              {/* Repeat Mode Toggle */}
+              <div className="space-y-3">
+                <h2 className="display-text font-bold text-charcoal text-lg">繰り返しモード</h2>
+                <button
+                  onClick={() => setRepeatMode(!repeatMode)}
+                  className={`w-full text-left rounded-2xl p-4 border-2 transition-all duration-200 ${
+                    repeatMode
+                      ? 'border-violet-500 bg-violet-50 shadow-md'
+                      : 'border-warm-beige bg-white hover:border-violet-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-charcoal">各問題を3回繰り返す</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        1つの問題を3回正解するまで繰り返します
+                      </p>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full transition-all ${repeatMode ? 'bg-violet-500' : 'bg-gray-300'} relative`}>
+                      <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all ${repeatMode ? 'left-6' : 'left-0.5'}`} />
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Visibility Mode */}
+              <div className="space-y-3">
+                <h2 className="display-text font-bold text-charcoal text-lg">表示モード</h2>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => setVisibilityMode('all')}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      visibilityMode === 'all'
+                        ? 'bg-terracotta text-white shadow-md'
+                        : 'bg-white border border-warm-beige text-charcoal hover:bg-warm-beige/30'
+                    }`}
+                  >
+                    全表示
+                  </button>
+                  <button
+                    onClick={() => setVisibilityMode('optional')}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      visibilityMode === 'optional'
+                        ? 'bg-terracotta text-white shadow-md'
+                        : 'bg-white border border-warm-beige text-charcoal hover:bg-warm-beige/30'
+                    }`}
+                  >
+                    任意表示
+                  </button>
+                  <button
+                    onClick={() => setVisibilityMode('korean-only')}
+                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                      visibilityMode === 'korean-only'
+                        ? 'bg-terracotta text-white shadow-md'
+                        : 'bg-white border border-warm-beige text-charcoal hover:bg-warm-beige/30'
+                    }`}
+                  >
+                    韓国語のみ
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {visibilityMode === 'all' && '全ての情報（韓国語・日本語・カタカナ・発音）を表示'}
+                  {visibilityMode === 'optional' && '表示/非表示を切り替えできます'}
+                  {visibilityMode === 'korean-only' && '韓国語のみ表示。他の情報は繰り返し中に非表示'}
+                </p>
               </div>
 
               {/* Word count */}
